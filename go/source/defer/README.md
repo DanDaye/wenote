@@ -89,7 +89,7 @@ recover
 
 ## 3.1. defer 结构定义
 
-每个协程对象中，存在一个 _defer 指针，该指针指向与该协程相关联的defer，每个 defer 的调用只与当前协程有关 ，与其它协程无关。
+每个协程对象中，存在一个 _defer 指针，该指针指向与该协程相关联的 defer，每个 defer 的调用只与当前协程有关 ，与其它协程无关。
 
 ```go
 type g struct  {
@@ -119,7 +119,6 @@ type _defer struct {
 
 多个 defer 与 goroutine 的关联如下：
 
-
 ![g_defer.png](https://p6-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/e5aa09a8afb6440686b2b74e125f8083~tplv-k3u1fbpfcp-watermark.image?)
 
 ## 3.2. 延迟执行 
@@ -135,7 +134,6 @@ func doDefer() {
 }
 ```
 
-
 输出结果如下，说明 defer 后的函数待函数执行返回时才执行，因此可以很好地用作资源释放。
 
 ```xml
@@ -143,17 +141,17 @@ doDefer normal
 do defer
 ```
 
-通过 `go tool compile -N -l main.go` + `go tool objdump main.o`运行函数，观察main.go 的汇编情况。
+通过 `go tool compile -N -l main.go` + `go tool objdump main.o`运行函数，观察 main.go 的汇编情况。
 
 ![defer_delay.png](https://p9-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/bf963e4a80c745ae9a198449e82e70f5~tplv-k3u1fbpfcp-watermark.image?)
 
-在执行 doDefer 函数的过程中，先是调用 runtime.deferprocStack() 方法，待 fmt.Println()打印结束后，再执行 runtime.deferreturn。编译器会自动在函数的最后插入 deferreturn, 这也是 defer 为何具有延迟执行特性的原因。
+在执行 doDefer 函数的过程中，先是调用 runtime.deferprocStack() 方法，待 fmt.Println() 打印结束后，再执行 runtime.deferreturn。编译器会自动在函数的最后插入 deferreturn, 这也是 defer 为何具有延迟执行特性的原因。
 
 打开 runtime/panic.go 文件， 查看 deferprocStack 函数的内容，如下：
 
 ```go
 func deferprocStack(d *_defer) {
-	gp := getg() // 获取 g,判断是否在当前栈上
+	gp := getg() // 获取 g, 判断是否在当前栈上
 	if gp.m.curg != gp {
 		// go code on the system stack can't defer
 		throw("defer on system stack")
@@ -236,7 +234,7 @@ func deferreturn() {
 	case sys.PtrSize:
 		*(*uintptr)(unsafe.Pointer(argp)) = *(*uintptr)(deferArgs(d))
 	default:
-    // 在栈上的 _defer,与它关联的参数立即存储在内存的  _defer head 后 
+    // 在栈上的 _defer, 与它关联的参数立即存储在内存的  _defer head 后 
 		memmove(unsafe.Pointer(argp), deferArgs(d), uintptr(d.siz))
 	}
 	fn := d.fn
@@ -256,7 +254,7 @@ func deferreturn() {
 ```
 
 ## 3.3. 参数预计算
-下边程序的 defer 函数中传入参数 a ,参数 a 在后边执行加一操作。
+下边程序的 defer 函数中传入参数 a , 参数 a 在后边执行加一操作。
 
 ```go
 package main
@@ -271,8 +269,7 @@ func main(){
 }
 ```
 
-
-输出如下,在 deferA 中输出的参数 a,并没有随着 a 的改变，而输出 2，在
+输出如下，在 deferA 中输出的参数 a, 并没有随着 a 的改变，而输出 2，在
 
 ```xml
 normal run,a:2
@@ -366,7 +363,7 @@ DeferA
   main.go:8             0x127a                  4881c428010000                  ADDQ $0x128, SP
   main.go:8             0x1281                  c3                              RET
 ```
-针对 DeferA, DeferB,DeferC,编译器分布将关键字 defer 转换成 runtime.deferprocStack，并在运行末尾进行三次 deferreturn。从3.2中可知，runtime.deferprocStack 每次都创建一个 _defer ，并将其加入到 goroutine 的 _defer 链表头部，执行完三次 runtime.deferprocStack 后，_defer 链表的情况是 DeferC -> DeferB -> DeferA 。同样从 3.2 中可知 runtime.deferreturn 每次取出 goroutine 的 _defer 并调用执行其关联的 function。因此，程序中三个 defer 的执行顺序是 DeferC、DeferB、DeferA。
+针对 DeferA, DeferB,DeferC, 编译器分布将关键字 defer 转换成 runtime.deferprocStack，并在运行末尾进行三次 deferreturn。从 3.2 中可知，runtime.deferprocStack 每次都创建一个 _defer ，并将其加入到 goroutine 的 _defer 链表头部，执行完三次 runtime.deferprocStack 后，_defer 链表的情况是 DeferC -> DeferB -> DeferA 。同样从 3.2 中可知 runtime.deferreturn 每次取出 goroutine 的 _defer 并调用执行其关联的 function。因此，程序中三个 defer 的执行顺序是 DeferC、DeferB、DeferA。
 
 # 4. 捕捉异常
 ## 4.1. 如何捕捉异常
@@ -524,7 +521,7 @@ type _panic struct {
 	aborted   bool           // panic 被终止
 }
 ```
-通过汇编编译得到对应的.o文件如下：
+通过汇编编译得到对应的。o 文件如下：
 
 ```xml
 TEXT %22%22.doPanic(SB) gofile../Users/gertieliang/GolandProjects/LearnGoProject/main.go
@@ -616,7 +613,7 @@ func gopanic(e interface{}) {
 		if gp._defer != d {
 			throw("bad defer entry in panic")
 		}
-                // 置空当前 _defer,从 goroutine 的 _defer 中移除，并 free 调
+                // 置空当前 _defer, 从 goroutine 的 _defer 中移除，并 free 调
 		d._panic = nil
 		d.fn = nil
 		gp._defer = d.link
@@ -650,7 +647,7 @@ func gopanic(e interface{}) {
 
 ## 4.3. defer 过程中发生 panic
 
-在执行 _defer 过程中, 程序仍可能发生 panic，下边为在执行 defer 过程中发生 panic 的示例。
+在执行 _defer 过程中，程序仍可能发生 panic，下边为在执行 defer 过程中发生 panic 的示例。
 
 ```go
 package main
@@ -697,8 +694,8 @@ exit status 2
 * 将 panicM 对象加入 goroutine 的 _panic 链表头
 * 将 deferB 的 started 状态置为 true, 将 deferB 的 _panic 属性指向当前 panic, 执行调用 deferB
 * 调用 deferB 过程中发生 panicB, 将 paincB 插入 goroutine 的 _panic 链表头，并将 panicB.link 执行 panicM
-* 取出 goroutine 的 _defer 头，发现此时 panicB 的状态为 started,将 deferB._panic 即 panicB 的 aborted 状态置为 true, 置空 deferB 并 free
-* 继续取出 goroutine 的 _defer 头 deferA,修改 deferA 的状态为 stated, deferA._panic = panicB, 执行调用 deferA,待 deferA 调用完成后，free deferA
+* 取出 goroutine 的 _defer 头，发现此时 panicB 的状态为 started, 将 deferB._panic 即 panicB 的 aborted 状态置为 true, 置空 deferB 并 free
+* 继续取出 goroutine 的 _defer 头 deferA, 修改 deferA 的状态为 stated, deferA._panic = panicB, 执行调用 deferA, 待 deferA 调用完成后，free deferA
 * 继续取 goroutine 的 _defer 头，发现链表为空，结束 _defer 链表的调用
 * 从头到尾，依次打印 goroutine 的 _panic 链表中未被 recoverd 的 panic 的堆栈信息。
 
