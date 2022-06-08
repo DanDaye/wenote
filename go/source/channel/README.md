@@ -19,7 +19,7 @@ import (
 	"sync"
 	"time"
 )
-
+![defer_delay](https://cdn.jsdelivr.net/gh/DanDaye/wenote/go/source/picture/defer_delay.png)
 func main() {
 	c := make(chan int)
 	wg := sync.WaitGroup{}
