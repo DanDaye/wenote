@@ -260,6 +260,7 @@ waitq 和 sudog 之间的关系如图所示，waiq 中存在分别指向 sudog �
 ## 3.3. makechan
 
 创建 channel 的流程如图所示
+
 ![20220610215642](https://cdn.jsdelivr.net/gh/DanDaye/wenote/go/source/picture/20220610215642.png)
 
 具体实现参考 `runtime/chan.go`
@@ -317,7 +318,7 @@ func makechan(t *chantype, size int) *hchan {
 
 ## 3.4. chansend
 
-runtime.chansend1 其主要内容如下, 其里边使用 runtime.chansend 函数，并设置 block 状态为 true
+runtime.chansend1 其主要内容如下，其里边使用 runtime.chansend 函数，并设置 block 状态为 true
 
 ```go
 func chansend1(c *hchan, elem unsafe.Pointer) {
@@ -331,10 +332,9 @@ chansend 函数大体流程如图所示
 - 判断 receiver 队列中是否有等待者，若是，则绕过 channel buffer 直接将数据发送给 receiver
 - 判断 channel 缓存队列是否已满，若否，则将数据内容加入到缓存中
 - 判断是否可阻塞，若否，则直接返回 false
-- 可阻塞状态下，创建 sudog 关联 channel 和对应的 goroutine，并代替对应的 goroutine 阻塞等待唤醒。chansend1 中设置的 block 为 true,故缓存满的时候，会阻塞 sender
+- 可阻塞状态下，创建 sudog 关联 channel 和对应的 goroutine，并代替对应的 goroutine 阻塞等待唤醒。chansend1 中设置的 block 为 true, 故缓存满的时候，会阻塞 sender
 
 ![20220610223708](https://cdn.jsdelivr.net/gh/DanDaye/wenote/go/source/picture/20220610223708.png)
-
 
 ```go
 func chansend(c *hchan, ep unsafe.Pointer, block bool, callerpc uintptr) bool {
@@ -457,8 +457,6 @@ func chansend(c *hchan, ep unsafe.Pointer, block bool, callerpc uintptr) bool {
 - 若 central cache 仍无可供使用的内存，则 new 一个
 
 释放 sudog 的内存分配则和创建是对应相反。
-
-
 
 ## 3.5. chanrecv
 
