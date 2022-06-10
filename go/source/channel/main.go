@@ -3,11 +3,10 @@ package main
 import (
 	"fmt"
 	"sync"
-	"time"
 )
 
 func main() {
-	c := make(chan int, 2)
+	c := make(chan int)
 	wg := sync.WaitGroup{}
 	wg.Add(2)
 	go func() {
@@ -22,27 +21,18 @@ func main() {
 }
 
 func sender(c chan int) {
-	time.Sleep(4 * time.Second)
-	for i := 0; i < 5; i++ {
-		start := time.Now()
-		c <- i
-		cost := time.Since(start)
-		fmt.Printf("send %d cost %v\n", i, cost)
-	}
+	c <- 1
 	close(c)
 }
 
 func receiver(c chan int) {
 	for {
-		start := time.Now()
 		rst, ok := <-c
 		if ok {
-			cost := time.Since(start)
-			fmt.Printf("receive %d cost %v\n", rst, cost)
+			fmt.Printf("receive %d\n", rst)
 		} else {
 			break
 		}
-		time.Sleep(4 * time.Second)
 	}
 }
 
