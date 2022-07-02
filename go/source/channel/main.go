@@ -6,16 +6,26 @@ import (
 )
 
 func main() {
-	c := make(chan int)
+	value := make(chan int32, 5)
 	wg := sync.WaitGroup{}
 	wg.Add(2)
 	go func() {
-		sender(c)
-		wg.Done()
+		defer wg.Done()
+		for i := 0; i <= 20; i++ {
+			value <- int32(i)
+		}
+		close(value)
 	}()
 	go func() {
-		receiver(c)
-		wg.Done()
+		defer wg.Done()
+		select {
+		case v, ok := <-value:
+			if ok {
+				fmt.Println(v)
+			} else {
+				break
+			}
+		}
 	}()
 	wg.Wait()
 }
