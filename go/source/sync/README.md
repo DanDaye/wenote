@@ -410,6 +410,69 @@ func (rw *RWMutex) rUnlockSlow(r int32) {
 
 # 4. WaitGroup
 
+> WaitGroup 可用于等待一系列 goroutine 执行完成，主 goroutine 调用 Add 方法设置需要等待的 goroutine 数量，并发出去的 goroutine 在执行相关逻辑完成后，调用 Done 方法。同时 Wait 方法可用于阻塞 goroutine 直到所有并发的 goroutine 完成。
+
+## 4.2. WaitGroup 使用示例
+
+在主 goroutine 初始化 WaitGroup 对象，并使用 Add 方法设置需要等待的 goroutine 数量，并用 Wait 方法阻塞主 goroutine 等待并发的 goroutine 执行完毕，大体如下：
+
+```go
+package main
+
+import (
+	"fmt"
+	"sync"
+)
+
+func main() {
+	wg := &sync.WaitGroup{}
+	wg.Add(1)
+	go func() {
+		fmt.Println("do something")
+		wg.Done()
+	}()
+	wg.Wait()
+        fmt.Println("success")
+}
+```
+
+打印输出结果如下：
+
+```xml
+do something
+success
+```
+
+Wait 方法将阻塞主 goroutine, 使得在并发的 goroutine 执行完成后，才打印输出 success。修改程序，移除主程序调用 Wait 方法，修改程序如下：
+
+```go
+package main
+
+import (
+	"fmt"
+	"sync"
+)
+
+func main() {
+	wg := &sync.WaitGroup{}
+	wg.Add(1)
+	go func() {
+		fmt.Println("do something")
+		wg.Done()
+	}()
+        fmt.Println("success")
+}
+```
+
+观察输出如下：
+
+```xml
+success
+```
+
+主 goroutine 由于没有被 Wait 阻塞，没有等待并发的 goroutine 执行完成便早已打印输出了 `success` 信息。
+
+
 # 4.2 WaitGroup 原理
 
 ```xml
